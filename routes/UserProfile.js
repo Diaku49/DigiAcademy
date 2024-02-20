@@ -2,14 +2,15 @@ const express = require('express');
 
 const UserProfileController = require('../controllers/UserProfile')
 const {body,check} = require('express-validator');
+const {IsAuth2} = require('./MiddleWare/isAuth');
 
 const Router = express.Router();
 
 //getUser
-Router.get('/info',UserProfileController.getUser);
+Router.get('/info',IsAuth2,UserProfileController.getUser);
 
 //Edit UserProfile
-Router.put('/edit',[
+Router.put('/edit',IsAuth2,[
     //email
     body('email')
     .isEmail()
@@ -26,7 +27,7 @@ Router.put('/edit',[
     .withMessage('Pass is not long enough.')
     ],UserProfileController.editUser);
 
-Router.delete('/delete',UserProfileController.deleteUser)
+Router.delete('/delete',IsAuth2,UserProfileController.deleteUser)
 
 
 

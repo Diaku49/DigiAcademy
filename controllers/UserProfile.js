@@ -8,11 +8,12 @@ const ClearFile = require('../util/ClearFile');
 
 exports.getUser = async (req,res,next)=>{
     try{
-        const user = await User.findById(req.userId)
-        if(!user){
-            const error = new Error('Couldnt find the user');
-            error.statusCode = 404;
-            throw error;
+        const user = req.user;
+        if(!user.email){
+            user.email = ''
+        }
+        if(!user.avatar){
+            user.avatar = ''
         }
         res.status(200).json({
             user:{
@@ -45,12 +46,7 @@ exports.editUser = async (req,res,next)=>{
         throw error;
         }
         // finding user
-        const user = await User.findById(req.userId)
-        if(!user){
-            const error = new Error('Couldnt find the user');
-            error.statusCode = 404;
-            throw error;
-        }
+        const user = req.user
         // check for pass
         if (req.body.password) {
             try{
@@ -93,18 +89,8 @@ exports.editUser = async (req,res,next)=>{
 
 exports.deleteUser = async (req,res,next)=>{
     try{
-        const user = await User.findById(req.userId)
-        if(!user){
-            const error = new Error('Couldnt find the user');
-            error.statusCode = 404;
-            throw error;
-        }
-        await User.findByIdAndDelete(req.userId);
-        const token = req.headers.authorization.split(' ')[1];
-        const balckToken = new BlacklistToken({
-            token:token
-        })
-        await balckToken.save()
+        const user = req.user
+        await User.findByIdAndDelete(user._id);
         res.status(201).json({
             message:'black token added.',
         })

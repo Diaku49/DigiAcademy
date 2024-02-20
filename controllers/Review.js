@@ -37,7 +37,7 @@ try{
         error.data = errors.array();
         throw error
     }
-    const user = await User.findById(req.userId);
+    const user = req.user
     const courseId = req.params.courseId;
     const course = await Course.findById(courseId).populate('Reviews');
     if(!course){
@@ -45,7 +45,7 @@ try{
         error.statusCode = 404;
         throw error;
     };
-    const equal = await Review.findOne({createdBy:req.userId,course:courseId});
+    const equal = await Review.findOne({createdBy:user._id,course:courseId});
     if(equal){
         const error = new Error('this User already gave Review.');
         error.statusCode = 409;
@@ -81,6 +81,7 @@ catch(err){
 
 exports.editReview = async(req,res,next)=>{
 try{
+    const user = req.user
     const errors = validationResult(req)
     if(!errors.isEmpty()){
         const error = new Error('Validation Failed');
@@ -92,6 +93,12 @@ try{
     if(!review ){
         const error = new Error('Couldnt find Review.');
         error.statusCode = 404;
+        throw error;
+    }
+    
+    if(review.createdBy === user._id){
+        const error = new Error('Not Allowed.');
+        error.statusCode = 403;
         throw error;
     }
     review.rating = req.body.rating;
@@ -112,7 +119,7 @@ catch(err){
 
 exports.deleteReview = async (req,res,next)=>{
 try{
-    const user = await User.findById(req.userId);
+    const user = req.user
     const review = await Review.findById(req.params.reviewId);
     const course = await Course.findById(req.params.courseId);
     if(!review || !course){
@@ -144,12 +151,18 @@ catch(err){
 
 exports.Rating = async (req,res,next)=>{
 try{
+    const user = req.user
     const course = await Course.findById(req.params.courseId).populate('Reviews');
     if(!course){
         const error = new Error('Couldnt find Course');
         error.statusCode = 404;
         throw error;
     };
+    if(course.createdBy !== user._id ){
+        const error = new Error('Dont have the permission');
+        error.statusCode = 403;
+        throw error;
+    }
     let TotalRating = 0;
     const TotalReviews = course.Reviews.length;
     course.Reviews.forEach(item=>{
