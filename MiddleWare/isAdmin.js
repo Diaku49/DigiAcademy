@@ -2,7 +2,7 @@ const User = require('../models/User')
 
 const isAdmin = async (req,res,next)=>{
 try{
-    const user = req.session.data.user
+    const user = req.user
     if(user.role !== 'admin'){
         const error = new Error('Not Admin');
         error.statusCode = 403;

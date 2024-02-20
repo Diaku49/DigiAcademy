@@ -106,3 +106,24 @@ exports.deleteUser = async (req,res,next)=>{
         next(err);
     }
 }
+
+
+exports.ChangeRole = async(req,res,next)=>{
+    try{
+        const Cuser = await User.findById(req.params.CuserId);
+        if(!Cuser){
+            const error = new Error('Couldnt find the user');
+            error.statusCode = 404;
+            throw error;
+        }
+        Cuser.role = req.body.role;
+        await Cuser.save();
+        res.status(200);
+    }
+    catch(err){
+        if(!err.statusCode) {
+        err.statusCode = 500;
+        }
+        next(err);
+    }
+}

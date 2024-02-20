@@ -3,14 +3,14 @@ const {body} = require('express-validator');
 
 const AdminController = require('../controllers/Admin');
 const isAdmin = require('../MiddleWare/isAdmin');
-
+const {IsAuth2} = require('./MiddleWare/isAuth');
 
 
 const Router = express.Router();
 
-Router.get('/users',isAdmin,AdminController.getUsers);
+Router.get('/users',IsAuth2,isAdmin,AdminController.getUsers);
 
-Router.post('/users/edit/:userId',isAdmin,[
+Router.post('/users/edit/:userId',IsAuth2,isAdmin,[
     //email
     body('email')
     .isEmail()
@@ -27,7 +27,9 @@ Router.post('/users/edit/:userId',isAdmin,[
     .withMessage('Pass is not long enough.')
 ],AdminController.editUser);
 
-Router.delete('/user/delete/:userId',isAdmin,AdminController.deleteUser);
+Router.delete('/user/delete/:userId',IsAuth2,isAdmin,AdminController.deleteUser);
+
+Router.put('/user/changeRole/:userId/:CuserId',IsAuth2,AdminController.ChangeRole)
 
 
 
