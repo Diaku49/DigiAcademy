@@ -7,12 +7,7 @@ const io = require('../socket_io');
 
 exports.userEnrolls = async (req,res,next)=>{
 try{
-    const user = await User.findById(req.userId).populate('courseEnrolled');
-    if(!user){
-        const error = new Error('Couldnt find User');
-        error.statusCode = 404;
-        throw error;
-    }
+    const user = await req.user.populate('courseEnrolled');
     res.status(200).json({
         message:'Fetched the Enroll Courses',
         Ecourses:user.courseEnrolled
@@ -36,7 +31,7 @@ try{
         throw error;
     };
     // enroll user
-    const user = await User.findById(req.userId);
+    const user = req.user
     user.courseEnrolled.push(courseId);
     await user.save()
     //send enroll course
@@ -64,7 +59,7 @@ exports.Unroll = async (req,res,next)=>{
         throw error;
     };
     //check the course
-    const user = await User.findById(req.userId);
+    const user = req.user
     const CourseIndex = user.courseEnrolled.findIndex(courseId);
     if(CourseIndex === -1){
         const error = new Error('This Course wasnt Enrolled by the User.');

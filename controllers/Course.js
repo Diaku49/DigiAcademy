@@ -93,7 +93,7 @@ exports.CreateCourse = async (req,res,next)=>{
         Video:videos
     });
     await newCourse.save();
-    const user = await User.findById(req.userId);
+    const user = req.user;
     user.courseOwned.push(newCourse._id);
     await user.save();
     //informing other users
@@ -131,7 +131,7 @@ exports.EditCourse = async (req,res,next)=>{
         throw error;
     }
     //checking user
-    const user = await User.findById(req.userId);
+    const user = req.user
     const OwnCourse = await user.courseOwned.find({_id:courseId})
     if(!OwnCourse){
         const error = new Error('You dont Own the Course');
@@ -211,7 +211,13 @@ exports.DeleteCourse = async (req,res,next)=>{
         })
         ClearFile(videoPaths);
         ClearFile(course.imageUrl);
-        const user = await User.findById(req.userId);
+        const user = req.user;
+        const OwnCourse = await user.courseOwned.find({_id:courseId})
+        if(!OwnCourse){
+            const error = new Error('You dont Own the Course');
+            error.statusCode = 403;
+            throw error;
+        }
         user.courseOwned.pull(courseId);
         await user.save()
         await course.remove();
